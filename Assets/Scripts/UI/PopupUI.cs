@@ -39,7 +39,11 @@ namespace UI
         private Image _thumbnailImage;
         private CanvasGroup _canvasGroup;
         private Camera _mainCamera;
+        private RectTransform _rectTransform;
+        
         private bool _isVisible = false;
+        
+        private static PopupUI _instance;
         
         public static PopupUI ShowNewPopup(PopupData data)
         {
@@ -61,6 +65,7 @@ namespace UI
             _thumbnailImage = transform.RecursiveFind("Thumbnail",false).GetComponent<Image>();
             _canvasGroup = GetComponent<CanvasGroup>();
             _canvasGroup.alpha = 0;
+            _rectTransform = GetComponent<RectTransform>();
             
             _mainCamera = Camera.main;
             
@@ -92,7 +97,9 @@ namespace UI
         public void Show()
         {
             if (_isVisible) return;
+            if (_instance != null) return;
             _isVisible = true;
+            _instance = this;
             
             _canvasGroup.DOKill();
             var sequence = DOTween.Sequence();
@@ -100,7 +107,7 @@ namespace UI
             float duration = 0.25f;
             
             sequence.Append(_canvasGroup.DOFade(1, duration));
-            sequence.Join(transform.DOScale(Vector3.one, duration).From(Vector3.zero).SetEase(Ease.InQuad));
+            sequence.Join(transform.DOScale(Vector3.one, duration).From(Vector3.zero).SetEase(Ease.InQuint));
             
             sequence.Play();
         }
@@ -108,7 +115,9 @@ namespace UI
         public void Hide()
         {
             if (!_isVisible) return;
+            if (_instance != this) return;
             _isVisible = false;
+            _instance = null;
             
             _canvasGroup.DOKill();
             var sequence = DOTween.Sequence();
@@ -116,7 +125,7 @@ namespace UI
             float duration = 0.25f;
 
             sequence.Append(_canvasGroup.DOFade(0,duration));
-            sequence.Join(transform.DOScale(Vector3.zero, duration).From(Vector3.one).SetEase(Ease.OutQuad));
+            sequence.Join(transform.DOScale(Vector3.zero, duration).From(Vector3.one).SetEase(Ease.OutQuint));
             
             sequence.Play();
         }
@@ -134,8 +143,31 @@ namespace UI
             _thumbnailImage.sprite = Thumbnail;
             _titleText.text = Title;
             _descriptionText.text = Description;
-            Vector3 screenPos = _mainCamera.WorldToScreenPoint(WorldPosition);
-            transform.position = screenPos;
+            if (UIController.Instance.IsMobile)
+            {
+                // for mobile, the popup is going to be at the top of the screen, so we don't need to update its position based on the world position
+                
+                // step 1: set the pivot to the top center
+                _rectTransform.pivot = new Vector2(0.5f, 1f);
+                _rectTransform.anchorMin = new Vector2(0.5f, 1f);
+                _rectTransform.anchorMax = new Vector2(0.5f, 1f);
+                
+                // step 2: set the anchored position to be at the top center of the screen
+                _rectTransform.anchoredPosition = new Vector2(0, -(Screen.safeArea.position.y*2) - 50f);
+                _rectTransform.SetWidth(UIController.Instance.CanvasScaler.referenceResolution.x-400f);
+                
+                
+            }
+            else
+            {
+                _rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                _rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                _rectTransform.anchorMax = new Vector2(0.5f, 0.5f); 
+                _rectTransform.SetWidth(400);
+                
+                Vector3 screenPos = _mainCamera.WorldToScreenPoint(WorldPosition);
+                transform.position = screenPos;
+            }
         }
     }
 }

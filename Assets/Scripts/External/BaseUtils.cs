@@ -617,6 +617,26 @@ namespace External
             }
         }
 
+        // Cubic Bezier polynomial
+        public static float AppleCubicBezier(float p1, float p2, float t)
+        {
+            float u = 1 - t;
+            float tt = t * t;
+            float uu = u * u;
+            float uuu = uu * u;
+            float ttt = tt * t;
+
+            // B = (3*uu*t*p1) + (3*u*tt*p2) + ttt
+            return (3 * uu * t * p1) + (3 * u * tt * p2) + ttt;
+        }
+        
+        // Delegate method: t goes from 0 to 1 over the duration of the tween
+        public static float AppleEaseFunction(float time, float duration, float overshootOrPeriod, float amplitude)
+        {
+            // Custom math equation (e.g., a simple square function)
+            return AppleCubicBezier(0, 1, time);
+        }
+        
         public static float InverseLerp(float a, float b, float value)
         {
             return Mathf.Clamp01((value - a) / (b - a));

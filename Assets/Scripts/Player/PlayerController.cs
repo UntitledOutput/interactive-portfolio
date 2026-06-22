@@ -1,6 +1,8 @@
 using System;
-using GameInputSystem;
+using UI;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using InputSystem = GameInputSystem.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,7 +11,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody _rigidbody;
     private Camera _mainCamera;
 
-    
+
     public float CameraDistance = 5;
     
     void Start()
@@ -29,11 +31,20 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 movement = new Vector3(InputSystem.Move.x, 0, InputSystem.Move.y);
+
+        
+
+        if (UIController.Instance.currentInputMethod == UIController.InputMethod.Touch)
+        {
+            movement = new Vector3(UIController.Instance.Joystick.MoveDirection.x, 0, UIController.Instance.Joystick.MoveDirection.y);
+        }
+
         
         movement = _mainCamera.transform.TransformDirection(movement);
         movement.y = 0;
         
-        movement = movement.normalized;
+        if (movement.magnitude > 1)
+            movement = movement.normalized;
         
         Vector3 velocity = movement * 5f;
         velocity.y = _rigidbody.linearVelocity.y;
