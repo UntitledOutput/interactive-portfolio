@@ -100,7 +100,7 @@ namespace UI
             float duration = 0.25f;
             
             sequence.Append(_canvasGroup.DOFade(1, duration));
-            sequence.Join(transform.DOScale(Vector3.one, duration).From(Vector3.zero).SetEase(Ease.InElastic));
+            sequence.Join(transform.DOScale(Vector3.one, duration).From(Vector3.zero).SetEase(Ease.InQuad));
             
             sequence.Play();
         }
@@ -116,7 +116,7 @@ namespace UI
             float duration = 0.25f;
 
             sequence.Append(_canvasGroup.DOFade(0,duration));
-            sequence.Join(transform.DOScale(Vector3.zero, duration).From(Vector3.one).SetEase(Ease.InBack));
+            sequence.Join(transform.DOScale(Vector3.zero, duration).From(Vector3.one).SetEase(Ease.OutQuad));
             
             sequence.Play();
         }
